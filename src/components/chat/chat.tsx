@@ -3,6 +3,7 @@
 import { Message } from "@/lib/zod";
 import { useState } from "react";
 import MessageInput from "./message-input";
+import { yieldStream } from "@/utils/stream";
 
 const initialMessages: Message[] = [
   { role: 'user', content: 'Whats up my AI friend?' },
@@ -23,6 +24,8 @@ export default function Chat() {
   const [content, setContent] = useState<string>('');
   const [isThinking, setIsThinking] = useState<boolean>(false);
 
+  console.log(messages);
+
   async function handleNewMessage(message: Message) {
     const updatedMessages = [...messages, message];
 
@@ -30,7 +33,7 @@ export default function Chat() {
     setContent('')
     setIsThinking(true);
 
-    const response = await fetch('/api/chat', {
+    const response = await fetch('/api/chat/stream', {
       method: 'POST',
       body: JSON.stringify({
         messages: updatedMessages
@@ -41,11 +44,57 @@ export default function Chat() {
       throw new Error(response.statusText);
     }
 
-    const data = await response.json();
+    // const data = await response.json();
+    const data = response.body;
 
-    const updatedMessagesWithResponse = [...updatedMessages, data];
-    setMessages(updatedMessagesWithResponse);
+    if (!data) {
+      throw new Error('no data')
+    }
+
     setIsThinking(false);
+
+    let isFirst = true;
+
+    for await (const chunk of yieldStream(data)) {
+      if (chunk === '{}') continue;
+      
+      const i = chunk.indexOf('}{');    // -1 if only one chunk in chunk
+
+      if (isFirst) {
+        isFirst = false;
+        const newMessage: Message = { role: 'assistant', content: '' }; 
+        
+        if (i !== -1) {
+          // we have two chunks in one
+          // const c1 = JSON.parse(chunk.slice(0, i+1));
+          const { content } = JSON.parse(chunk.slice(i+1));
+          newMessage.content = content;
+        }
+
+        setMessages((messages) => [...messages, newMessage]);
+        continue;
+      }
+
+      let additionalContent = '';
+
+      if (i !== -1) {
+        const c1 = JSON.parse(chunk.slice(0, i + 1));
+        const c2 = JSON.parse(chunk.slice(i + 1));
+        additionalContent = c1.content + c2.content;
+      } else {
+        const { content } = JSON.parse(chunk);
+        additionalContent = content;
+      }
+
+      setMessages((messages) => {
+        const lastMessage = messages[messages.length - 1];
+        const updatedLastMessage = {
+          ...lastMessage,
+          content: lastMessage.content + additionalContent
+        };
+        return [...messages.slice(0, -1), updatedLastMessage]
+      });
+    }
 
     console.log(data);
   }
@@ -74,7 +123,7 @@ function MessageThread({ messages, isThinking }: MessageThreadProps) {
           Ask something.
         </div>
       )}
-      {isThinking && <ChatMessage isUser={false} text="Thinking..." />}
+      {isThinking && <ChatMessage isUser={false} text="⏺ ⏺ ⏺" />}
     </section>
   );
 }
