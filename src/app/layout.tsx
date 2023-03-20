@@ -15,8 +15,7 @@ export default function RootLayout({ children }: LayoutProps) {
   return (
     <html lang="en">
       <body
-        className={`${overpassMono.className} bg-black text-[#f0fff8] p-3 text-lg`}
-        style={{textShadow: '0 0 3px #80ffc0, 0 0 10px #00ff66, 0 0 20px #00ff66, 0 0 30px #00ff66'}}
+        className={`${overpassMono.className}`}
       >
         {children}
       </body>
