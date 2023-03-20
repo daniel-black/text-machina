@@ -8,7 +8,7 @@ export default function LandingPage() {
         <h1 className="text-2xl sm:text-4xl font-semibold">⦿ Welcome&nbsp;friend</h1>
         <p className="">Come chat with undying collective consciousness of any human who ever wrote words.</p>
         <ApiKeyForm />
-        <p>Or skip that whole thang and <Link href={'/chat'} className="underline underline-offset-4 hover:bg-black hover:bg-opacity-10 transition-all duration-75">use Dan's API key</Link></p>
+        <p>Or skip that whole thang and <Link href={'/chat'} className="underline underline-offset-4 hover:bg-black hover:bg-opacity-10 transition-all duration-75">use Dan&apos;s API key</Link></p>
       </div>
     </div>
   );
