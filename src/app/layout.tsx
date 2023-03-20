@@ -14,9 +14,7 @@ export type LayoutProps = { children: React.ReactNode };
 export default function RootLayout({ children }: LayoutProps) {
   return (
     <html lang="en">
-      <body
-        className={`${overpassMono.className}`}
-      >
+      <body className={`${overpassMono.className}`}>
         {children}
       </body>
     </html>
