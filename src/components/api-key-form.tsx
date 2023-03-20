@@ -21,7 +21,7 @@ export default function ApiKeyForm() {
   return (
     <div className="space-y-4 text-opacity-75">
       <p>Enter your <Link href='https://platform.openai.com/account/api-keys' className="underline underline-offset-4 hover:bg-black hover:bg-opacity-10 transition-all duration-75">OpenAI API Key</Link> to get started:</p>
-      <form onSubmit={handleSubmit} className="w-full flex space-x-3">
+      <form onSubmit={handleSubmit} className="w-full flex">
         <input
           value={key}
           onChange={e => setKey(e.target.value)}
