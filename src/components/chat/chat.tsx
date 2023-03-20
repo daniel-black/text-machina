@@ -4,6 +4,10 @@ import { Message } from "@/lib/zod";
 import { useState } from "react";
 import MessageInput from "./message-input";
 import { yieldStream } from "@/utils/stream";
+import { ReactMarkdown } from "react-markdown/lib/react-markdown";
+import remarkGfm from "remark-gfm";
+// import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+// import { nord as s } from 'react-syntax-highlighter/dist/esm/styles/prism'
 
 const initialMessages: Message[] = [
   { role: 'user', content: 'Whats up my AI friend?' },
@@ -44,7 +48,6 @@ export default function Chat() {
       throw new Error(response.statusText);
     }
 
-    // const data = await response.json();
     const data = response.body;
 
     if (!data) {
@@ -66,7 +69,6 @@ export default function Chat() {
         
         if (i !== -1) {
           // we have two chunks in one
-          // const c1 = JSON.parse(chunk.slice(0, i+1));
           const { content } = JSON.parse(chunk.slice(i+1));
           newMessage.content = content;
         }
@@ -95,12 +97,11 @@ export default function Chat() {
         return [...messages.slice(0, -1), updatedLastMessage]
       });
     }
-
-    console.log(data);
   }
 
   return (
     <main className="h-screen flex flex-col">
+      <div className="py-2 text-white bg-black text-center border-b border-white">Text Machina</div>
       <MessageThread messages={messages} isThinking={isThinking} />
       <MessageInput content={content} setContent={setContent} onSend={handleNewMessage} />
     </main>
@@ -123,16 +124,42 @@ function MessageThread({ messages, isThinking }: MessageThreadProps) {
           Ask something.
         </div>
       )}
-      {isThinking && <ChatMessage isUser={false} text="⏺ ⏺ ⏺" />}
+      {isThinking && <ChatMessage isUser={false} text="Dreaming..." />}
     </section>
   );
 }
 
 function ChatMessage({ isUser, text }: { isUser: boolean, text: string }) {
   return (
-    <div className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
+    <div className={`flex items-start ${isUser ? 'justify-end' : 'justify-start'}`}>
       <section className={`w-fit max-w-[80%] p-4 border border-black ${isUser ? '' : 'bg-black text-white'}`}>
-        {text}
+        {isUser ? (text) : (
+          <ReactMarkdown
+            remarkPlugins={[remarkGfm]}
+            // components={{
+            //   code({node, inline, className, children, ...props}) {
+            //     const match = /language-(\w+)/.exec(className || '')
+            //     return !inline && match ? (
+            //       <SyntaxHighlighter
+            //         children={String(children).replace(/\n$/, '')}
+            //         style={{
+            //           'color': '#ff0000'
+            //         }}
+            //         language={match[1]}
+            //         PreTag="div"
+            //         {...props}
+            //       />
+            //     ) : (
+            //       <code className={className} {...props}>
+            //         {children}
+            //       </code>
+            //     )
+            //   }
+            // }}
+          >
+            {text}
+          </ReactMarkdown>
+        )}
       </section>
     </div>
   );

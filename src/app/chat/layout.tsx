@@ -6,8 +6,9 @@ const chats = ['Famous french authors', 'Macaroni recipe', 'Go HTTP request', 'F
 export default function ChatLayout({ children }: LayoutProps) {
   return (
     <div className="h-screen w-full flex">
-      <SideBar />
-      <main className="w-5/6">
+      {/* <SideBar /> */}
+      {/* w-5/6 */}
+      <main className="w-full">
         {children}
       </main>
     </div>
