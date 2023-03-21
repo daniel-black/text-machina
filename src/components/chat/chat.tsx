@@ -6,23 +6,8 @@ import MessageInput from "./message-input";
 import { yieldStream } from "@/utils/stream";
 import { ReactMarkdown } from "react-markdown/lib/react-markdown";
 import remarkGfm from "remark-gfm";
-// import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-// import { nord as s } from 'react-syntax-highlighter/dist/esm/styles/prism'
 
-const initialMessages: Message[] = [
-  { role: 'user', content: 'Whats up my AI friend?' },
-  { role: 'assistant', content: 'Not too much, brethren' },
-  { role: 'user', content: 'Catch the game last night?' },
-  { role: 'assistant', content: 'Nah I was stuck watching the kiddos jfkadjkf fkdja  fjkd jfkd jfk k fkjakfj kiddos jfkadjkf fkdja  fjkd jfkd jfk k fkjakfj kiddos jfkadjkf fkdja  fjkd jfkd jfk k fkjakfj kiddos jfkadjkf fkdja  fjkd jfkd jfk k fkjakfj kiddos jfkadjkf fkdja  fjkd jfkd jfk k fkjakfj' },
-  { role: 'user', content: 'Rats thats a real bummer' },
-  { role: 'assistant', content: 'Yeah dude it sucked' },
-  { role: 'user', content: 'Catch the game last night?' },
-  { role: 'assistant', content: 'Nah I was stuck watching the kiddos jfkadjkf fkdja  fjkd jfkd jfk k fkjakfj kiddos jfkadjkf fkdja  fjkd jfkd jfk k fkjakfj kiddos jfkadjkf fkdja  fjkd jfkd jfk k fkjakfj kiddos jfkadjkf fkdja  fjkd jfkd jfk k fkjakfj kiddos jfkadjkf fkdja  fjkd jfkd jfk k fkjakfj' },
-  { role: 'user', content: 'Rats thats a real bummer' },
-  { role: 'assistant', content: 'Yeah dude it sucked' },
-];
 
-// This is the component that stores context to a chat thread
 export default function Chat() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [content, setContent] = useState<string>('');
@@ -37,7 +22,7 @@ export default function Chat() {
     setContent('')
     setIsThinking(true);
 
-    const response = await fetch('/api/chat/stream', {
+    const response = await fetch('/api/chat', {
       method: 'POST',
       body: JSON.stringify({
         messages: updatedMessages
@@ -113,7 +98,7 @@ type MessageThreadProps = {
   isThinking: boolean;
 }
 
-// essentially a readonly component. Just displays previous message history
+// Essentially a readonly component. Just displays previous message history
 function MessageThread({ messages, isThinking }: MessageThreadProps) {
   return (
     <section className="flex-1 p-4 space-y-4 overflow-y-scroll">
@@ -136,26 +121,6 @@ function ChatMessage({ isUser, text }: { isUser: boolean, text: string }) {
         {isUser ? (text) : (
           <ReactMarkdown
             remarkPlugins={[remarkGfm]}
-            // components={{
-            //   code({node, inline, className, children, ...props}) {
-            //     const match = /language-(\w+)/.exec(className || '')
-            //     return !inline && match ? (
-            //       <SyntaxHighlighter
-            //         children={String(children).replace(/\n$/, '')}
-            //         style={{
-            //           'color': '#ff0000'
-            //         }}
-            //         language={match[1]}
-            //         PreTag="div"
-            //         {...props}
-            //       />
-            //     ) : (
-            //       <code className={className} {...props}>
-            //         {children}
-            //       </code>
-            //     )
-            //   }
-            // }}
           >
             {text}
           </ReactMarkdown>
