@@ -28,7 +28,6 @@ export default function ApiKeyForm() {
           type="text"
           className="outline-none border border-black py-2 px-3 w-5/6"
           spellCheck={false}
-          required
         />
         <button className="py-2 w-1/6 bg-black text-white border border-black hover:opacity-75 transition-opacity duration-75">GO</button>
       </form>
