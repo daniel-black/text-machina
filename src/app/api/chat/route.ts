@@ -2,7 +2,7 @@ import { SYSTEM_MESSAGE, TURBO } from "@/lib/constants";
 import { Message } from "@/lib/zod";
 import { OpenAI } from "openai-streams";
 
-export const runtime = 'experimental-edge';
+export const runtime = 'edge';
 
 export async function POST(req: Request) {
   try {
