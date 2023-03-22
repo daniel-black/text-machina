@@ -24,7 +24,7 @@ export default async function PreviousChats({ userId }: { userId: string }) {
           ))}
         </ul>
         ) : (
-          <span>none</span>
+          <span className="text-xs">(none)</span>
         )}
     </div>
   );

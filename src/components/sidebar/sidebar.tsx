@@ -1,14 +1,14 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import UserDataWrapper from "./user-data-wrapper";
+import UserDataFallback from "./user-data-fallback";
 
 
 export default function Sidebar() {
-
   return (
     <section className="w-1/6 h-screen flex flex-col border-r border-black">
       <Link href="/chat" className="block text-center p-2 m-2 border border-black border-dashed hover:border-solid">＋New</Link>
-      <Suspense fallback={<p>HELLO</p>}>
+      <Suspense fallback={<UserDataFallback />}>
         {/* @ts-expect-error Server Component */}
         <UserDataWrapper />
       </Suspense>

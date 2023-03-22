@@ -15,7 +15,7 @@ export default function User({ email }: { email: string | undefined }) {
 
   return (
     <div className="text-xs p-2 space-y-0.5">
-      {email && <div>{email}</div>}
+      {email && <div className="overflow-hidden overflow-ellipsis">{email}</div>}
       <div>
         <button onClick={handleClick} className="hover:underline underline-offset-4 transition-all duration-75">log out</button>
       </div>
