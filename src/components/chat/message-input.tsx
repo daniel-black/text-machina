@@ -9,23 +9,24 @@ type MessageInputProps = {
 
 export default function MessageInput({ content, setContent, onSend }: MessageInputProps) {
   return (
-    <div className="h-32 border-t border-black flex justify-center items-center">
+    <div className="h-[91px] border-t border-black">
       <form
         onSubmit={e => {
           e.preventDefault();
           onSend({ role: 'user', content });
         }}
-        className="w-[80%] flex justify-center items-center"
+        className="flex bg-blue-500 h-full"
       >
         <input
           value={content}
           onChange={e => setContent(e.target.value)}
-          type="text"
-          className="w-full border border-black p-3 outline-none"
+          className="w-full h-full inline px-10 py-2 outline-none text-lg"
+          spellCheck={false}
+          placeholder=">"
           required
         />
         <button
-          className="p-3 border border-l-0 border-black bg-black text-white flex justify-center items-center"
+          className="px-6 bg-black text-white flex justify-center items-center"
         >
           SEND
         </button>

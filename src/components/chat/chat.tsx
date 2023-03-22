@@ -86,7 +86,6 @@ export default function Chat() {
 
   return (
     <main className="h-screen flex flex-col">
-      <div className="py-2 text-white bg-black text-center border-b border-white">Text Machina</div>
       <MessageThread messages={messages} isThinking={isThinking} />
       <MessageInput content={content} setContent={setContent} onSend={handleNewMessage} />
     </main>

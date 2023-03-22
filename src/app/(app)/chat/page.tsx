@@ -1,7 +1,5 @@
+import Chat from "@/components/chat/chat";
+
 export default function NewChatPage() {
-  return (
-    <div>
-      New chat page
-    </div>
-  );
+  return <Chat />;
 }
