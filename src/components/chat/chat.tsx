@@ -4,8 +4,7 @@ import { Message } from "@/lib/zod";
 import { useState } from "react";
 import MessageInput from "./message-input";
 import { yieldStream } from "@/utils/stream";
-import { ReactMarkdown } from "react-markdown/lib/react-markdown";
-import remarkGfm from "remark-gfm";
+import Thread from "./thread";
 
 
 export default function Chat() {
@@ -86,45 +85,8 @@ export default function Chat() {
 
   return (
     <main className="h-screen flex flex-col">
-      <MessageThread messages={messages} isThinking={isThinking} />
+      <Thread messages={messages} isThinking={isThinking} />
       <MessageInput content={content} setContent={setContent} onSend={handleNewMessage} />
     </main>
-  );
-}
-
-type MessageThreadProps = {
-  messages: Message[];
-  isThinking: boolean;
-}
-
-// Essentially a readonly component. Just displays previous message history
-function MessageThread({ messages, isThinking }: MessageThreadProps) {
-  return (
-    <section className="flex-1 p-4 space-y-4 overflow-y-scroll">
-      {messages.length > 0 ? (
-        messages.map((m, i) => <ChatMessage key={i} isUser={m.role === 'user'} text={m.content} />)
-      ) : (
-        <div className="h-full flex justify-center items-center">
-          Ask something.
-        </div>
-      )}
-      {isThinking && <ChatMessage isUser={false} text="Dreaming..." />}
-    </section>
-  );
-}
-
-function ChatMessage({ isUser, text }: { isUser: boolean, text: string }) {
-  return (
-    <div className={`flex items-start ${isUser ? 'justify-end' : 'justify-start'}`}>
-      <section className={`w-fit max-w-[80%] p-4 border border-black ${isUser ? '' : 'bg-black text-white'}`}>
-        {isUser ? (text) : (
-          <ReactMarkdown
-            remarkPlugins={[remarkGfm]}
-          >
-            {text}
-          </ReactMarkdown>
-        )}
-      </section>
-    </div>
   );
 }
