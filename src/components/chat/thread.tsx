@@ -1,14 +1,14 @@
-import { Message } from "@/lib/zod";
+'use client';
+
+import { useStore } from "@/store";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
-type ThreadProps = {
-  messages: Message[];
-  isThinking: boolean;
-};
-
 // Essentially a readonly component. Just displays previous message history
-export default function Thread({ messages, isThinking }: ThreadProps) {
+export default function Thread() {
+  const messages = useStore(state => state.messages);
+  const isStreaming = useStore(state => state.isStreaming);
+
   return (
     <section className="flex-1 p-4 space-y-4 overflow-y-scroll">
       {messages.length > 0 ? (
@@ -18,7 +18,7 @@ export default function Thread({ messages, isThinking }: ThreadProps) {
           Ask something.
         </div>
       )}
-      {isThinking && <ChatMessage isUser={false} text="Dreaming..." />}
+      {isStreaming && <ChatMessage isUser={false} text="Dreaming..." />}
     </section>
   );
 }
