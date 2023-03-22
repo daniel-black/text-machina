@@ -3,7 +3,7 @@
 import { Message } from "@/lib/zod";
 import { useStore } from "@/store";
 import { getDataStream, yieldStream } from "@/utils/stream";
-import { FormEvent, useRef } from "react";
+import { FormEvent, useCallback, useRef } from "react";
 
 export default function MessageInput() {
   const chatId = useStore(state => state.chatId);
@@ -15,19 +15,28 @@ export default function MessageInput() {
 
   let inputRef = useRef<HTMLInputElement>(null);
 
-  const handleFocus = () => {
+  const handleFocus = useCallback(() => {
     if (inputRef.current) inputRef.current.focus();
+  }, [inputRef]);
+
+  const handleBlur = useCallback(() => {
+    if (inputRef.current) inputRef.current.blur();
+  }, [inputRef]);
+  
+  const processChunk = (chunk: string) => {
+    const parsedChunk = JSON.parse(chunk);
+
+    if (Object.hasOwn(parsedChunk, 'role')) {
+      addMessage({ role: parsedChunk.role, content: '' });
+    } else if (Object.hasOwn(parsedChunk, 'content')) {
+      updateLastMessageContent(parsedChunk.content)
+    }
   }
 
-  const handleBlur = () => {
-    if (inputRef.current) inputRef.current.blur();
-  }
-  
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (!inputRef.current?.value || inputRef.current.value === '') return;
-    console.log(inputRef.current?.value)
 
     const newMessage: Message = { role: 'user', content: inputRef.current.value };
 
@@ -36,38 +45,21 @@ export default function MessageInput() {
     const stream = await getDataStream([...messages, newMessage]);
     setIsStreaming(false);
 
-    let isFirst = true;
     for await (const chunk of yieldStream(stream)) {
-      if (chunk === '{}') continue;
-      
-      const i = chunk.indexOf('}{');    // -1 if only one chunk in chunk
+      if (chunk === '{}') continue;  // the last chunk in the stream is `{}` so just skip it
 
-      if (isFirst) {
-        isFirst = false;
-        const newMessage: Message = { role: 'assistant', content: '' }; 
-        
-        if (i !== -1) {
-          // we have two chunks in one
-          const { content } = JSON.parse(chunk.slice(i+1));
-          newMessage.content = content;
-        }
+      console.log(chunk);
+      const chunks = getChunksFromChunk(chunk);
+      console.log(chunks);
 
-        addMessage(newMessage);
-        continue;
-      }
-
-      let additionalContent = '';
-
-      if (i !== -1) {
-        const c1 = JSON.parse(chunk.slice(0, i + 1));
-        const c2 = JSON.parse(chunk.slice(i + 1));
-        additionalContent = c1.content + c2.content;
+      // most of the time the chunks array will just have one element.
+      if (chunks.length === 1) {
+        processChunk(chunks[0]);
       } else {
-        const { content } = JSON.parse(chunk);
-        additionalContent = content;
+        for (const c of chunks) {
+          processChunk(c);
+        }
       }
-
-      updateLastMessageContent(additionalContent);
     }
 
     inputRef.current.value = '';
@@ -84,12 +76,42 @@ export default function MessageInput() {
           spellCheck={false}
           placeholder=">"
         />
-        <button
-          className="px-6 bg-black text-white flex justify-center items-center"
-        >
-          SEND
-        </button>
+        <button disabled={isStreaming} className="px-6 bg-black text-white flex justify-center items-center">SEND</button>
       </form>
     </div>
   );
+}
+
+function findSplitIndices(chunk: string) {
+  const indices: number[] = [];
+
+  for (let i = 1; i < chunk.length - 1; i++) {
+    if (chunk[i] === '}' && chunk[i + 1] === '{') {
+      indices.push(i + 1);
+    }
+  }
+
+  return indices;
+}
+
+// Sometimes a chunk will actually be multiple chunks like:
+// {"role":"assistant"}{"content":"In"}{"content":" the"}
+// so we need to further break it down into the true individual pieces
+function getChunksFromChunk(chunk: string) {
+  const chunks: string[] = [];
+  const splitIndices = findSplitIndices(chunk);
+  
+  if (splitIndices.length === 0) {
+    chunks.push(chunk);
+  } else {
+    let startIndex = 0;
+    for (let i = 0; i < splitIndices.length; i++) {
+      const endIndex = splitIndices[i];
+      chunks.push(chunk.slice(startIndex, endIndex));
+      startIndex = endIndex;
+    }
+    chunks.push(chunk.slice(startIndex));
+  }
+
+  return chunks;
 }

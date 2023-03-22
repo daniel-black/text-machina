@@ -1,6 +1,7 @@
 'use client';
 
 import { useStore } from "@/store";
+import { useEffect, useRef } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
@@ -8,6 +9,14 @@ import remarkGfm from "remark-gfm";
 export default function Thread() {
   const messages = useStore(state => state.messages);
   const isStreaming = useStore(state => state.isStreaming);
+
+  const bottomOfMessageStackRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    bottomOfMessageStackRef.current?.scrollIntoView({ behavior: "auto" });
+  }, [messages]);
+
+  console.log(messages)
 
   return (
     <section className="flex-1 p-4 space-y-4 overflow-y-scroll">
@@ -19,6 +28,7 @@ export default function Thread() {
         </div>
       )}
       {isStreaming && <ChatMessage isUser={false} text="Dreaming..." />}
+      <div className="h-0 w-0" ref={bottomOfMessageStackRef} />
     </section>
   );
 }
