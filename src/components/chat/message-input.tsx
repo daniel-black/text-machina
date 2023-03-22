@@ -2,8 +2,9 @@
 
 import { Message } from "@/lib/zod";
 import { useStore } from "@/store";
-import { getDataStream, yieldStream } from "@/utils/stream";
-import { FormEvent, useCallback, useRef } from "react";
+import { getChunksFromChunk, getDataStream, yieldStream } from "@/utils/stream";
+import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
+
 
 export default function MessageInput() {
   const chatId = useStore(state => state.chatId);
@@ -13,7 +14,38 @@ export default function MessageInput() {
   const setIsStreaming = useStore(state => state.setIsStreaming);
   const updateLastMessageContent = useStore(state => state.updateLastMessageContent);
 
+  const [readyToSave, setReadyToSave] = useState<boolean>(false);
+
+  console.log({readyToSave})
+
   let inputRef = useRef<HTMLInputElement>(null);
+
+  // when readyToSave is true, the useEffect fires off a call to save chat messages
+  // useEffect(() => {
+  //   async function saveData() {
+  //     if (messages.length === 2 && chatId === undefined) {
+  //       // create chat in DB
+  //       const res = await fetch('/api/db/chat', {
+  //         method: 'POST',
+  //         body: JSON.stringify(messages),
+  //       });
+      
+  //       if (!res.ok) throw new Error(res.statusText);
+      
+  //       const data = await res.json();
+  //       console.log(data)
+  //     }
+
+  //     setReadyToSave(false);
+  //   }
+
+  
+
+  //   if (readyToSave) {
+  //     saveData();
+  //   }
+  // }, [readyToSave]);
+  
 
   const handleFocus = useCallback(() => {
     if (inputRef.current) inputRef.current.focus();
@@ -39,18 +71,15 @@ export default function MessageInput() {
     if (!inputRef.current?.value || inputRef.current.value === '') return;
 
     const newMessage: Message = { role: 'user', content: inputRef.current.value };
-
     addMessage(newMessage);
+
     setIsStreaming(true);
     const stream = await getDataStream([...messages, newMessage]);
     setIsStreaming(false);
 
     for await (const chunk of yieldStream(stream)) {
-      if (chunk === '{}') continue;  // the last chunk in the stream is `{}` so just skip it
-
-      console.log(chunk);
+      if (chunk === '{}') continue;
       const chunks = getChunksFromChunk(chunk);
-      console.log(chunks);
 
       // most of the time the chunks array will just have one element.
       if (chunks.length === 1) {
@@ -63,6 +92,8 @@ export default function MessageInput() {
     }
 
     inputRef.current.value = '';
+    
+    setReadyToSave(true);
   }
 
   return (
@@ -82,36 +113,3 @@ export default function MessageInput() {
   );
 }
 
-function findSplitIndices(chunk: string) {
-  const indices: number[] = [];
-
-  for (let i = 1; i < chunk.length - 1; i++) {
-    if (chunk[i] === '}' && chunk[i + 1] === '{') {
-      indices.push(i + 1);
-    }
-  }
-
-  return indices;
-}
-
-// Sometimes a chunk will actually be multiple chunks like:
-// {"role":"assistant"}{"content":"In"}{"content":" the"}
-// so we need to further break it down into the true individual pieces
-function getChunksFromChunk(chunk: string) {
-  const chunks: string[] = [];
-  const splitIndices = findSplitIndices(chunk);
-  
-  if (splitIndices.length === 0) {
-    chunks.push(chunk);
-  } else {
-    let startIndex = 0;
-    for (let i = 0; i < splitIndices.length; i++) {
-      const endIndex = splitIndices[i];
-      chunks.push(chunk.slice(startIndex, endIndex));
-      startIndex = endIndex;
-    }
-    chunks.push(chunk.slice(startIndex));
-  }
-
-  return chunks;
-}

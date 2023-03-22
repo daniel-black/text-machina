@@ -16,7 +16,7 @@ export default function Thread() {
     bottomOfMessageStackRef.current?.scrollIntoView({ behavior: "auto" });
   }, [messages]);
 
-  console.log(messages)
+  // console.log(messages)
 
   return (
     <section className="flex-1 p-4 space-y-4 overflow-y-scroll">
