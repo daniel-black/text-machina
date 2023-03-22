@@ -5,18 +5,22 @@ import { OpenAI } from "openai-streams";
 export const runtime = 'experimental-edge';
 
 export async function POST(req: Request) {
-  const { messages } = await req.json() as { messages: Message[] };
-
-  const stream = await OpenAI('chat', {
-    model: TURBO,
-    messages: [
-      SYSTEM_MESSAGE,
-      ...messages,
-    ],
+  try {
+    const { messages } = await req.json() as { messages: Message[] };
     
-  });
-
-  return new Response(stream);
+    const stream = await OpenAI('chat', {
+      model: TURBO,
+      messages: [
+        SYSTEM_MESSAGE,
+        ...messages,
+      ],
+      
+    });
+  
+    return new Response(stream);
+  } catch (e) {
+    throw e;
+  }
 }
 
 // Erroring in prod
